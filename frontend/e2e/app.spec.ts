@@ -17,7 +17,7 @@ test.describe('Home Page', () => {
 test.describe('Text Conversion', () => {
   test('should convert text to lowercase', async ({ page }) => {
     await page.goto('/convert/lower');
-    await page.fill('textarea[placeholder*="Enter text"]', 'HELLO WORLD');
+    await page.fill('textarea[placeholder="Enter text here..."]', 'HELLO WORLD');
     await page.click('button:has-text("Convert")');
     await expect(page.locator('textarea[readonly]')).toHaveValue('hello world');
   });
