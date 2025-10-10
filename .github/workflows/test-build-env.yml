@@ -1,0 +1,109 @@
+name: Test Build Environment
+
+on:
+  push:
+    branches: [ main, copilot/** ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-build-env:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Install frontend dependencies
+        run: cd frontend && yarn install
+
+      - name: Build frontend and backend
+        run: npm run build
+
+      - name: Start production server in background
+        run: |
+          npm start &
+          echo "SERVER_PID=$!" >> $GITHUB_ENV
+        env:
+          CI: true
+
+      - name: Wait for health endpoint (60s timeout)
+        run: |
+          timeout=60
+          elapsed=0
+          until curl -f http://localhost:8080/health || [ $elapsed -ge $timeout ]; do
+            echo "Waiting for server health check... ($elapsed/$timeout seconds)"
+            sleep 2
+            elapsed=$((elapsed + 2))
+          done
+          if [ $elapsed -ge $timeout ]; then
+            echo "Health check timed out after ${timeout} seconds"
+            exit 1
+          fi
+          echo "Health check successful!"
+
+      - name: Test home page loads with correct title
+        run: |
+          response=$(curl -s http://localhost:8080/)
+          if echo "$response" | grep -q "Test App"; then
+            echo "✓ Home page loaded successfully with correct title"
+          else
+            echo "✗ Home page title not found"
+            echo "Response: $response"
+            exit 1
+          fi
+
+      - name: Test convert page loads with correct title
+        run: |
+          response=$(curl -s http://localhost:8080/convert/lower)
+          if echo "$response" | grep -q "Test App"; then
+            echo "✓ Convert page loaded successfully"
+          else
+            echo "✗ Convert page title not found"
+            echo "Response: $response"
+            exit 1
+          fi
+
+      - name: Test math API endpoint
+        run: |
+          response=$(curl -s http://localhost:8080/api/math/add/1/2)
+          if echo "$response" | grep -q '"output":3'; then
+            echo "✓ Math API endpoint working correctly"
+            echo "Response: $response"
+          else
+            echo "✗ Math API endpoint failed"
+            echo "Response: $response"
+            exit 1
+          fi
+
+      - name: Verify embedded frontend is served
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/)
+          if [ "$response" = "200" ]; then
+            echo "✓ Embedded frontend served successfully (HTTP $response)"
+          else
+            echo "✗ Embedded frontend failed (HTTP $response)"
+            exit 1
+          fi
+
+      - name: Stop production server
+        if: always()
+        run: |
+          # Kill the server process
+          pkill -f "./bin/server" || true
+          pkill -f "go run" || true
+          sleep 2

@@ -89,7 +89,10 @@ A full-stack enterprise-level web application with React frontend and Go backend
 │   ├── backend.yml             # Backend CI
 │   ├── frontend.yml            # Frontend CI
 │   ├── e2e.yml                 # E2E tests
-│   └── security.yml            # Security scanning
+│   ├── security.yml            # Security scanning
+│   ├── test-development-env.yml # Dev environment testing
+│   ├── test-test-env.yml       # Test environment validation
+│   └── test-build-env.yml      # Build environment testing
 │
 ├── Dockerfile                  # Production build
 ├── Dockerfile.dev              # Development build
@@ -384,10 +387,41 @@ The project includes comprehensive GitHub Actions workflows:
 - **Uploads screenshots as artifacts**
 - **Uploads test reports as artifacts**
 
-### Security Scanning (\`.github/workflows/security.yml\`)
+### Security Scanning (`.github/workflows/security.yml`)
 - Trivy vulnerability scanning
 - CodeQL static analysis
 - Dependency security checks
+
+### Environment Testing Workflows
+
+The project includes automated workflows to verify development, test, and production environments:
+
+#### Test Development Environment (`.github/workflows/test-development-env.yml`)
+- Installs all dependencies (Node.js, Go, Air)
+- Starts dev servers in parallel (`npm run dev`)
+- Verifies health endpoint at http://localhost:3000/health
+- Tests home page loads with correct title
+- Tests convert page accessibility
+- Tests math API endpoint functionality
+- Automatically stops servers after testing
+
+#### Test Test Environment (`.github/workflows/test-test-env.yml`)
+- Runs all backend unit tests with race detection
+- Runs all frontend unit tests with coverage
+- Installs Playwright browsers
+- Runs E2E tests with screenshot capture
+- Uploads test results and coverage reports as artifacts
+
+#### Test Build Environment (`.github/workflows/test-build-env.yml`)
+- Builds frontend and backend for production
+- Starts production server with embedded frontend
+- Verifies health endpoint at http://localhost:8080/health
+- Tests that home page is served correctly
+- Tests that convert pages are accessible
+- Verifies math API endpoint works in production mode
+- Automatically stops server after testing
+
+These workflows ensure that the application works correctly across all deployment scenarios.
 
 ## Development
 

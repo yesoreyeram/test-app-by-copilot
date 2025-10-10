@@ -1,0 +1,103 @@
+name: Test Test Environment
+
+on:
+  push:
+    branches: [ main, copilot/** ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-env:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Install frontend dependencies
+        run: cd frontend && yarn install
+
+      - name: Install backend dependencies
+        run: cd backend && go mod download
+
+      - name: Run backend unit tests
+        run: cd backend && go test ./... -v -race -coverprofile=coverage.out
+
+      - name: Run frontend unit tests
+        run: cd frontend && yarn test --coverage --passWithNoTests
+
+      - name: Install Playwright browsers
+        run: cd frontend && npx playwright install --with-deps chromium
+
+      - name: Build frontend for E2E tests
+        run: cd frontend && yarn build
+
+      - name: Start backend server for E2E
+        run: |
+          cd backend && go run cmd/server/main.go &
+          echo "BACKEND_PID=$!" >> $GITHUB_ENV
+        env:
+          CI: true
+
+      - name: Wait for backend to be ready
+        run: |
+          timeout=30
+          elapsed=0
+          until curl -f http://localhost:8080/health || [ $elapsed -ge $timeout ]; do
+            echo "Waiting for backend... ($elapsed/$timeout seconds)"
+            sleep 2
+            elapsed=$((elapsed + 2))
+          done
+          if [ $elapsed -ge $timeout ]; then
+            echo "Backend startup timed out"
+            exit 1
+          fi
+          echo "Backend ready!"
+
+      - name: Run E2E tests
+        run: cd frontend && yarn test:e2e
+
+      - name: Upload E2E test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          retention-days: 7
+
+      - name: Upload E2E screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-screenshots
+          path: frontend/test-results/**/*.png
+          retention-days: 7
+
+      - name: Stop backend server
+        if: always()
+        run: |
+          pkill -f "go run" || true
+          sleep 2
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            backend/coverage.out
+            frontend/coverage/
+          retention-days: 7
