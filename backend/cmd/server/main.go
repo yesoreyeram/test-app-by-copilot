@@ -60,9 +60,30 @@ func main() {
 	http.HandleFunc("/api/auth/logout", authMiddleware.RequireAuth(logoutHandler))
 	http.HandleFunc("/api/auth/profile", authMiddleware.RequireAuth(profileHandler))
 
-	// Serve static files for all other routes (only if dist exists)
+	// Serve static files and SPA routes (only if dist exists)
 	if err == nil {
-		http.Handle("/", http.FileServer(http.FS(distFS)))
+		// Create a SPA handler that serves index.html for all non-API routes
+		spaHandler := func(w http.ResponseWriter, r *http.Request) {
+			// Try to serve the requested file
+			path := r.URL.Path
+			
+			// If the path doesn't have an extension and isn't the root, it's likely a SPA route
+			// Serve index.html for SPA routes
+			if path != "/" && !strings.Contains(path, ".") {
+				indexData, err := fs.ReadFile(distFS, "index.html")
+				if err != nil {
+					http.Error(w, "index.html not found", http.StatusNotFound)
+					return
+				}
+				w.Header().Set("Content-Type", "text/html; charset=utf-8")
+				w.Write(indexData)
+				return
+			}
+			
+			// Otherwise serve the static file
+			http.FileServer(http.FS(distFS)).ServeHTTP(w, r)
+		}
+		http.HandleFunc("/", spaHandler)
 	}
 
 	port := "8080"
