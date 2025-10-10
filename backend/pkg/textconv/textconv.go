@@ -3,6 +3,9 @@ package textconv
 import (
 	"strings"
 	"unicode"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // ToLowerCase converts text to lowercase
@@ -37,7 +40,8 @@ func ToCamelCase(input string) string {
 
 // ToTitleCase converts text to Title Case
 func ToTitleCase(input string) string {
-	return strings.Title(strings.ToLower(input))
+	caser := cases.Title(language.English)
+	return caser.String(strings.ToLower(input))
 }
 
 // ToInverseCase inverts the case of each character

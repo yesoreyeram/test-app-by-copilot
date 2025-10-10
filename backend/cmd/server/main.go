@@ -67,7 +67,7 @@ func main() {
 
 	port := "8080"
 	log.Printf("Server starting on port %s", port)
-	
+
 	server := &http.Server{
 		Addr:         ":" + port,
 		ReadTimeout:  15 * time.Second,
