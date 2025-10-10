@@ -19,8 +19,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'cd ../backend && go run cmd/server/main.go',
+    command: process.env.CI 
+      ? 'cd ../backend && ./bin/server'
+      : 'cd ../backend && go run cmd/server/main.go',
     url: 'http://localhost:8080',
     reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
   },
 });
