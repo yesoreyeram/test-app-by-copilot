@@ -13,7 +13,7 @@ A full-stack enterprise-level web application with React frontend and Go backend
 - Responsive design with Tailwind CSS
 - Sticky top navigation with logo, breadcrumbs, and search
 - Collapsible left sidebar with feature links
-- Multiple theme support (Dark, Light, Gold)
+- Multiple theme support (Dark, Light, Gold) - **Dark theme by default**
 - Hero section on home page
 
 ### Authentication
@@ -25,17 +25,18 @@ A full-stack enterprise-level web application with React frontend and Go backend
 ## Tech Stack
 
 ### Frontend
-- **React** with TypeScript
-- **React Router** for routing
-- **Tailwind CSS** for styling
+- **React 19** with TypeScript
+- **React Router 7** for routing
+- **Tailwind CSS 4** for styling
 - **Zod** for validation
-- **Webpack** for bundling with Hot Module Replacement
+- **Webpack 5** for bundling with Hot Module Replacement
 - **Jest** and **React Testing Library** for unit testing
 - **Playwright** for E2E testing
 - **Yarn** as package manager
 
 ### Backend
-- **Go** (Golang)
+- **Go 1.24**
+- Embedded frontend (no CORS needed)
 - Modular package structure:
   - `textconv` - Text conversion operations
   - `mathops` - Mathematical operations
@@ -43,8 +44,8 @@ A full-stack enterprise-level web application with React frontend and Go backend
   - `auth` - Authentication middleware
   - `store` - In-memory data storage
 - RESTful API with path parameters
-- CORS-enabled
 - Health check endpoint
+- Hot reload support with Air
 
 ## Project Structure
 
@@ -61,23 +62,29 @@ A full-stack enterprise-level web application with React frontend and Go backend
 │   ├── e2e/                # Playwright E2E tests
 │   └── webpack.config.js   # Webpack configuration
 │
-└── backend/
-    ├── cmd/server/         # Main application entry point
-    ├── pkg/                # Public packages
-    │   ├── textconv/       # Text conversion
-    │   ├── mathops/        # Math operations
-    │   ├── tempconv/       # Temperature conversion
-    │   └── auth/           # Authentication
-    └── internal/store/     # Internal data storage
-
+├── backend/
+│   ├── cmd/server/         # Main application entry point
+│   ├── pkg/                # Public packages
+│   │   ├── textconv/       # Text conversion
+│   │   ├── mathops/        # Math operations
+│   │   ├── tempconv/       # Temperature conversion
+│   │   └── auth/           # Authentication
+│   └── internal/store/     # Internal data storage
+│
+├── .github/workflows/      # CI/CD pipelines
+├── Dockerfile              # Production build
+├── Dockerfile.dev          # Development build
+├── docker-compose.yml      # Production compose
+└── docker-compose.dev.yml  # Development compose
 ```
 
 ## Getting Started
 
 ### Prerequisites
-- Go 1.20 or higher
-- Node.js 18 or higher
+- Go 1.24 or higher
+- Node.js 20 or higher
 - Yarn package manager
+- Docker and Docker Compose (optional)
 
 ### Installation
 
@@ -87,90 +94,129 @@ git clone https://github.com/yesoreyeram/test-app-by-copilot.git
 cd test-app-by-copilot
 ```
 
-2. Install backend dependencies:
-```bash
-cd backend
-go mod download
-```
-
-3. Install frontend dependencies:
+2. Install frontend dependencies:
 ```bash
 cd frontend
 yarn install
 ```
 
+3. Install backend dependencies:
+```bash
+cd ../backend
+go mod download
+```
+
 ### Running the Application
 
-#### Backend
+#### Option 1: Docker Compose (Recommended for Development)
+
+**Development mode with hot reload:**
 ```bash
-cd backend
+docker-compose -f docker-compose.dev.yml up
+```
+- Backend with Air hot reload: \`http://localhost:8080\`
+- Frontend dev server: \`http://localhost:3000\`
+
+**Production mode:**
+```bash
+docker-compose up --build
+```
+- Unified app (backend serves frontend): \`http://localhost:8080\`
+
+#### Option 2: Manual Setup
+
+**Backend (with embedded frontend):**
+```bash
+# Build frontend first
+cd frontend
+yarn build
+
+# Copy dist to backend (automated in Dockerfile)
+cp -r dist ../backend/cmd/server/
+
+# Run backend
+cd ../backend
 go run cmd/server/main.go
 ```
-The backend server will start on `http://localhost:8080`
+The application will be available at \`http://localhost:8080\`
 
-#### Frontend
+**Development mode with hot reload:**
 ```bash
+# Terminal 1: Frontend dev server
 cd frontend
-yarn start
-```
-The frontend dev server will start on `http://localhost:3000`
+yarn start    # Runs on http://localhost:3000
 
-The frontend is configured with a proxy to forward API calls to the backend.
+# Terminal 2: Backend with Air
+cd backend
+go install github.com/air-verse/air@latest
+air           # Runs on http://localhost:8080
+```
 
 ### Building for Production
 
-#### Backend
+#### Using Docker:
 ```bash
-cd backend
+docker build -t test-app .
+docker run -p 8080:8080 test-app
+```
+
+#### Manual build:
+```bash
+# Build frontend
+cd frontend
+yarn build
+
+# Copy to backend
+cp -r dist ../backend/cmd/server/
+
+# Build backend
+cd ../backend
 go build -o bin/server ./cmd/server
+
+# Run
 ./bin/server
 ```
 
-#### Frontend
-```bash
-cd frontend
-yarn build
-```
-The production build will be in the `dist/` directory.
+The production build will be available at \`http://localhost:8080\`
 
 ## API Endpoints
 
 ### Health Check
-- `GET /health` - Returns server health status
+- \`GET /health\` - Returns server health status
 
 ### Text Conversion
-- `POST /api/convert/lower` - Convert to lowercase
-- `POST /api/convert/upper` - Convert to uppercase
-- `POST /api/convert/camel` - Convert to camelCase
-- `POST /api/convert/title` - Convert to Title Case
-- `POST /api/convert/inverse` - Invert case
-- `POST /api/convert/reverse` - Reverse text
+- \`POST /api/convert/lower\` - Convert to lowercase
+- \`POST /api/convert/upper\` - Convert to uppercase
+- \`POST /api/convert/camel\` - Convert to camelCase
+- \`POST /api/convert/title\` - Convert to Title Case
+- \`POST /api/convert/inverse\` - Invert case
+- \`POST /api/convert/reverse\` - Reverse text
 
-Request body: `{ "input": "Hello World" }`
-Response: `{ "output": "hello world", "meta": { "status": "success" } }`
+Request body: \`{ "input": "Hello World" }\`
+Response: \`{ "output": "hello world", "meta": { "status": "success" } }\`
 
 ### Math Operations
-- `GET /api/math/add/{a}/{b}` - Addition
-- `GET /api/math/subtract/{a}/{b}` - Subtraction
-- `GET /api/math/multiply/{a}/{b}` - Multiplication
-- `GET /api/math/divide/{a}/{b}` - Division
+- \`GET /api/math/add/{a}/{b}\` - Addition
+- \`GET /api/math/subtract/{a}/{b}\` - Subtraction
+- \`GET /api/math/multiply/{a}/{b}\` - Multiplication
+- \`GET /api/math/divide/{a}/{b}\` - Division
 
-Response: `{ "output": 5 }`
+Response: \`{ "output": 5 }\`
 
 ### Temperature Conversion (Protected)
-- `GET /api/temp/c/f/{value}` - Celsius to Fahrenheit
-- `GET /api/temp/f/c/{value}` - Fahrenheit to Celsius
+- \`GET /api/temp/c/f/{value}\` - Celsius to Fahrenheit
+- \`GET /api/temp/f/c/{value}\` - Fahrenheit to Celsius
 
-Requires `Authorization: Bearer <token>` header
-Response: `{ "output": 32, "meta": { "status": "success" } }`
+Requires \`Authorization: Bearer {token}\` header
+Response: \`{ "output": 32, "meta": { "status": "success" } }\`
 
 ### Authentication
-- `POST /api/auth/register` - Register new user
-  - Body: `{ "username": "user", "email": "user@example.com", "password": "pass" }`
-- `POST /api/auth/login` - Login user
-  - Body: `{ "username": "user", "password": "pass" }`
-- `POST /api/auth/logout` - Logout user (protected)
-- `GET /api/auth/profile` - Get user profile (protected)
+- \`POST /api/auth/register\` - Register new user
+  - Body: \`{ "username": "user", "email": "user@example.com", "password": "pass" }\`
+- \`POST /api/auth/login\` - Login user
+  - Body: \`{ "username": "user", "password": "pass" }\`
+- \`POST /api/auth/logout\` - Logout user (protected)
+- \`GET /api/auth/profile\` - Get user profile (protected)
 
 ## Testing
 
@@ -196,36 +242,65 @@ npx playwright install
 yarn test:e2e
 ```
 
+## CI/CD
+
+The project includes GitHub Actions workflows for:
+- **Backend CI**: Linting (golangci-lint), testing, security scanning (gosec)
+- **Frontend CI**: Linting (ESLint), type checking, testing, Playwright E2E tests
+- **Security**: Trivy vulnerability scanning, CodeQL analysis
+
+## Development Tools
+
+### Hot Module Reloading
+- **Frontend**: Webpack Dev Server with HMR
+- **Backend**: Air for automatic Go code reloading
+
+### Code Quality
+- **Backend**: golangci-lint with comprehensive rule set
+- **Frontend**: ESLint, Prettier, TypeScript strict mode
+- **Security**: gosec, Trivy, CodeQL
+
+## Docker
+
+### Development
+```bash
+docker-compose -f docker-compose.dev.yml up
+```
+Includes hot reload for both frontend and backend.
+
+### Production
+```bash
+docker-compose up --build
+```
+Multi-stage build for optimized image with embedded frontend.
+
 ## Security Features
 
-- Password storage (currently in-memory, ready for database integration)
 - Session-based authentication with expiration
 - Protected routes requiring authentication
-- CORS configuration
+- No CORS issues (frontend embedded in backend)
 - Input validation with Zod
+- Security scanning in CI/CD pipeline
+- Dependency vulnerability checks
+
+## Architecture Highlights
+
+- **Embedded Frontend**: Frontend assets are embedded in Go binary, eliminating CORS and deployment complexity
+- **Modular Backend**: Clean separation of concerns with distinct packages
+- **Type Safety**: TypeScript in frontend, Go's strong typing in backend
+- **Hot Reload**: Development experience with instant feedback
+- **Container Ready**: Docker and Docker Compose for easy deployment
+- **CI/CD Ready**: Comprehensive GitHub Actions workflows
 
 ## Future Enhancements
 
-- Database integration (PostgreSQL/MySQL) for user storage
-- OAuth social login integration (Google, GitHub)
-- Enhanced password hashing (bcrypt)
+The codebase is structured to easily add:
+- Database integration (PostgreSQL/MySQL)
+- OAuth social login providers
+- Password hashing with bcrypt
 - Rate limiting
-- API documentation with Swagger
-- Docker containerization
-- CI/CD pipeline
-
-## Development
-
-### Hot Module Replacement
-Both frontend and backend support hot reloading during development:
-- Frontend: Webpack Dev Server with HMR
-- Backend: Can be integrated with tools like `air` or `fresh`
-
-### Code Quality
-- TypeScript for type safety in frontend
-- Go's strong typing in backend
-- Modular architecture with separation of concerns
-- Enterprise-level design patterns
+- WebSocket support
+- Kubernetes deployment manifests
 
 ## License
 

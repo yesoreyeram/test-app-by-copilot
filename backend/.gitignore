@@ -7,3 +7,6 @@ bin/
 *.out
 vendor/
 .DS_Store
+tmp/
+dist/
+cmd/server/dist/

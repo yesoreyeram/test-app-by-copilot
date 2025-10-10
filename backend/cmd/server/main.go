@@ -1,7 +1,9 @@
 package main
 
 import (
+	"embed"
 	"encoding/json"
+	"io/fs"
 	"log"
 	"net/http"
 	"strconv"
@@ -14,19 +16,23 @@ import (
 	"github.com/yesoreyeram/test-app-by-copilot/backend/pkg/textconv"
 )
 
+//go:embed dist
+var staticFiles embed.FS
+
 var userStore *store.MemoryStore
 var authMiddleware *auth.AuthMiddleware
-
-func enableCORS(w http.ResponseWriter) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-}
 
 func main() {
 	userStore = store.NewMemoryStore()
 	authMiddleware = auth.NewAuthMiddleware(userStore)
 
+	// Serve static files
+	distFS, err := fs.Sub(staticFiles, "dist")
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+	// API endpoints
 	http.HandleFunc("/health", healthHandler)
 	
 	// Text conversion endpoints
@@ -52,17 +58,15 @@ func main() {
 	http.HandleFunc("/api/auth/logout", authMiddleware.RequireAuth(logoutHandler))
 	http.HandleFunc("/api/auth/profile", authMiddleware.RequireAuth(profileHandler))
 
+	// Serve static files for all other routes
+	http.Handle("/", http.FileServer(http.FS(distFS)))
+
 	port := "8080"
 	log.Printf("Server starting on port %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
-	enableCORS(w)
-	if r.Method == "OPTIONS" {
-		return
-	}
-	
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"status": "healthy",
@@ -72,11 +76,6 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 
 func convertHandler(convType string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		enableCORS(w)
-		if r.Method == "OPTIONS" {
-			return
-		}
-		
 		if r.Method != http.MethodPost {
 			http.Error(w, `{"meta":{"status":"error","reason":"method not allowed"}}`, http.StatusMethodNotAllowed)
 			return
@@ -118,11 +117,6 @@ func convertHandler(convType string) http.HandlerFunc {
 }
 
 func mathHandler(w http.ResponseWriter, r *http.Request) {
-	enableCORS(w)
-	if r.Method == "OPTIONS" {
-		return
-	}
-	
 	if r.Method != http.MethodGet {
 		http.Error(w, `{"meta":{"status":"error","reason":"method not allowed"}}`, http.StatusMethodNotAllowed)
 		return
@@ -179,11 +173,6 @@ func mathHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func tempHandler(w http.ResponseWriter, r *http.Request) {
-	enableCORS(w)
-	if r.Method == "OPTIONS" {
-		return
-	}
-	
 	if r.Method != http.MethodGet {
 		http.Error(w, `{"meta":{"status":"error","reason":"method not allowed"}}`, http.StatusMethodNotAllowed)
 		return
@@ -225,11 +214,6 @@ func tempHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
-	enableCORS(w)
-	if r.Method == "OPTIONS" {
-		return
-	}
-	
 	if r.Method != http.MethodPost {
 		http.Error(w, `{"meta":{"status":"error","reason":"method not allowed"}}`, http.StatusMethodNotAllowed)
 		return
@@ -272,11 +256,6 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	enableCORS(w)
-	if r.Method == "OPTIONS" {
-		return
-	}
-	
 	if r.Method != http.MethodPost {
 		http.Error(w, `{"meta":{"status":"error","reason":"method not allowed"}}`, http.StatusMethodNotAllowed)
 		return
@@ -318,11 +297,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	enableCORS(w)
-	if r.Method == "OPTIONS" {
-		return
-	}
-	
 	if r.Method != http.MethodPost {
 		http.Error(w, `{"meta":{"status":"error","reason":"method not allowed"}}`, http.StatusMethodNotAllowed)
 		return
@@ -343,11 +317,6 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func profileHandler(w http.ResponseWriter, r *http.Request) {
-	enableCORS(w)
-	if r.Method == "OPTIONS" {
-		return
-	}
-	
 	if r.Method != http.MethodGet {
 		http.Error(w, `{"meta":{"status":"error","reason":"method not allowed"}}`, http.StatusMethodNotAllowed)
 		return

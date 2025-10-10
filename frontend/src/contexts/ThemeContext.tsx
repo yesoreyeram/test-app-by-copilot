@@ -10,24 +10,24 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('theme');
-    return (saved as Theme) || 'dark';
-  });
+  const [theme, setTheme] = useState<Theme>('dark'); // Start with dark by default
+
+  useEffect(() => {
+    // Load saved theme or use dark as default
+    const saved = localStorage.getItem('theme') as Theme;
+    if (saved && ['dark', 'light', 'gold'].includes(saved)) {
+      setTheme(saved);
+    }
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('theme', theme);
     
-    // Remove all theme classes
+    // Remove all theme classes first
     document.documentElement.classList.remove('dark', 'light', 'gold');
     
     // Add current theme class
     document.documentElement.classList.add(theme);
-    
-    // For dark mode support
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    }
   }, [theme]);
 
   return (
