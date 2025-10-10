@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { Input, Button } from '@/components/design-system';
 
 const MathPage: React.FC = () => {
   const { operation } = useParams<{ operation: string }>();
   const [num1, setNum1] = useState('');
   const [num2, setNum2] = useState('');
   const [result, setResult] = useState<number | string>('');
+  const [loading, setLoading] = useState(false);
 
   const getTitle = () => {
     switch (operation) {
@@ -18,6 +20,7 @@ const MathPage: React.FC = () => {
   };
 
   const handleCalculate = async () => {
+    setLoading(true);
     try {
       const response = await fetch(`/api/math/${operation}/${num1}/${num2}`);
 
@@ -30,55 +33,51 @@ const MathPage: React.FC = () => {
       }
     } catch (error) {
       setResult('Error occurred');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white gold:text-gold-900">
+      <h1 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
         {getTitle()}
       </h1>
       
-      <div className="bg-white dark:bg-gray-800 gold:bg-white rounded-lg shadow-md p-6">
+      <div className="rounded-lg shadow-md p-6" style={{ backgroundColor: 'var(--bg-secondary)' }}>
         <div className="grid md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-              First Number
-            </label>
-            <input
-              type="number"
-              value={num1}
-              onChange={(e) => setNum1(e.target.value)}
-              className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white gold:border-gold-300"
-              placeholder="Enter first number"
-            />
-          </div>
+          <Input
+            label="First Number"
+            type="number"
+            value={num1}
+            onChange={(e) => setNum1(e.target.value)}
+            placeholder="Enter first number"
+            fullWidth
+          />
 
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-              Second Number
-            </label>
-            <input
-              type="number"
-              value={num2}
-              onChange={(e) => setNum2(e.target.value)}
-              className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white gold:border-gold-300"
-              placeholder="Enter second number"
-            />
-          </div>
+          <Input
+            label="Second Number"
+            type="number"
+            value={num2}
+            onChange={(e) => setNum2(e.target.value)}
+            placeholder="Enter second number"
+            fullWidth
+          />
         </div>
 
-        <button
+        <Button
           onClick={handleCalculate}
-          className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition mb-4"
+          fullWidth
+          loading={loading}
+          className="mb-4"
         >
           Calculate
-        </button>
+        </Button>
 
         {result !== '' && (
-          <div className="p-4 bg-gray-50 dark:bg-gray-900 gold:bg-gold-50 rounded-lg">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Result:</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white gold:text-gold-900">
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-primary)' }}>
+            <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Result:</p>
+            <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
               {result}
             </p>
           </div>

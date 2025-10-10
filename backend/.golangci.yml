@@ -23,7 +23,9 @@ linters:
 
 linters-settings:
   govet:
-    check-shadowing: true
+    settings:
+      shadow:
+        strict: true
   goimports:
     local-prefixes: github.com/yesoreyeram/test-app-by-copilot
   gocritic:

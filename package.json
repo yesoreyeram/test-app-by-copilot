@@ -7,7 +7,7 @@
     "dev:frontend": "cd frontend && yarn start",
     "dev:backend": "cd backend && air",
     "build": "npm run build:frontend && npm run build:backend",
-    "build:frontend": "cd frontend && yarn build && cp -r dist ../backend/cmd/server/",
+    "build:frontend": "cd frontend && yarn build",
     "build:backend": "cd backend && go build -o bin/server ./cmd/server",
     "start": "cd backend && ./bin/server"
   },

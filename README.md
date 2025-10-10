@@ -1,6 +1,6 @@
 # test-app-by-copilot
 
-A full-stack enterprise-level web application with React frontend and Go backend, featuring text conversion, math operations, and temperature conversion tools.
+A full-stack enterprise-level web application with React frontend and Go backend, featuring text conversion, math operations, and temperature conversion tools with a comprehensive design system.
 
 ## Features
 
@@ -9,7 +9,11 @@ A full-stack enterprise-level web application with React frontend and Go backend
 - **Math Operations**: Addition, subtraction, multiplication, and division
 - **Temperature Converter**: Celsius to Fahrenheit and vice versa (protected route)
 
-### UI/UX
+### UI/UX & Design System
+- **Comprehensive Design System** with reusable components:
+  - `Input`: Text input with labels, error states, and theming
+  - `Select`: Dropdown selector with custom styling
+  - `Button`: Multiple variants (primary, secondary, danger, ghost) with loading states
 - Responsive design with Tailwind CSS
 - Sticky top navigation with logo, breadcrumbs, and search
 - Collapsible left sidebar with feature links
@@ -31,8 +35,10 @@ A full-stack enterprise-level web application with React frontend and Go backend
 - **React 19** with TypeScript
 - **React Router 7** for routing
 - **Tailwind CSS 4** for styling with custom theme system
+- **Design System** with reusable Input, Select, and Button components
 - **Zod** for validation
 - **Webpack 5** for bundling with Hot Module Replacement
+  - **Automatic build output** to backend directory (no manual copying needed)
 - **Jest** and **React Testing Library** for unit testing
 - **Playwright** for E2E testing
 - **Yarn** as package manager
@@ -56,30 +62,40 @@ A full-stack enterprise-level web application with React frontend and Go backend
 .
 ├── frontend/
 │   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/          # Page components
-│   │   ├── contexts/       # React contexts (Theme, Auth)
-│   │   └── styles.css      # Global styles with theme CSS variables
-│   ├── public/             # Static assets
-│   ├── e2e/                # Playwright E2E tests
-│   └── webpack.config.js   # Webpack config with proxy
+│   │   ├── components/
+│   │   │   ├── design-system/  # Reusable UI components
+│   │   │   │   ├── Input.tsx
+│   │   │   │   ├── Select.tsx
+│   │   │   │   ├── Button.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── Layout.tsx
+│   │   │   ├── TopNav.tsx
+│   │   │   └── Sidebar.tsx
+│   │   ├── pages/              # Page components
+│   │   ├── contexts/           # React contexts (Theme, Auth)
+│   │   └── styles.css          # Global styles with theme CSS variables
+│   ├── public/                 # Static assets
+│   ├── e2e/                    # Playwright E2E tests
+│   └── webpack.config.js       # Webpack config with auto-output to backend
 │
 ├── backend/
-│   ├── cmd/server/         # Main application entry point
-│   ├── pkg/                # Public packages
-│   └── internal/store/     # Internal data storage
+│   ├── cmd/server/
+│   │   ├── main.go             # Main application entry point
+│   │   └── dist/               # Frontend build output (auto-generated)
+│   ├── pkg/                    # Public packages
+│   └── internal/store/         # Internal data storage
 │
-├── .github/workflows/      # CI/CD pipelines
-│   ├── backend.yml         # Backend CI
-│   ├── frontend.yml        # Frontend CI
-│   ├── e2e.yml             # E2E tests
-│   └── security.yml        # Security scanning
+├── .github/workflows/          # CI/CD pipelines
+│   ├── backend.yml             # Backend CI
+│   ├── frontend.yml            # Frontend CI
+│   ├── e2e.yml                 # E2E tests
+│   └── security.yml            # Security scanning
 │
-├── Dockerfile              # Production build
-├── Dockerfile.dev          # Development build
-├── docker-compose.yml      # Production compose
-├── docker-compose.dev.yml  # Development compose  
-└── package.json            # Root package with dev scripts
+├── Dockerfile                  # Production build
+├── Dockerfile.dev              # Development build
+├── docker-compose.yml          # Production compose
+├── docker-compose.dev.yml      # Development compose  
+└── package.json                # Root package with dev scripts
 \`\`\`
 
 ## Getting Started
@@ -134,6 +150,7 @@ Access the app at **http://localhost:3000** during development.
 npm run build
 npm start
 \`\`\`
+The frontend automatically builds to \`backend/cmd/server/dist/\` - no manual copying needed!
 Access the unified app at **http://localhost:8080**.
 
 #### Option 2: Docker Compose
@@ -158,7 +175,7 @@ docker-compose up --build
 cd frontend
 yarn start    # Runs on http://localhost:3000
 \`\`\`
-The webpack dev server is configured with a proxy that forwards `/api` and `/health` requests to `http://localhost:8080`.
+The webpack dev server is configured with a proxy that forwards \`/api\` and \`/health\` requests to \`http://localhost:8080\`.
 
 **Backend with Air (hot reload):**
 \`\`\`bash
@@ -169,12 +186,9 @@ air           # Runs on http://localhost:8080
 
 **Backend (with embedded frontend):**
 \`\`\`bash
-# Build frontend first
+# Build frontend (automatically outputs to backend/cmd/server/dist)
 cd frontend
 yarn build
-
-# Copy dist to backend
-cp -r dist ../backend/cmd/server/
 
 # Run backend
 cd ../backend
@@ -190,6 +204,8 @@ npm run build    # Builds frontend and backend
 npm start        # Starts the unified server
 \`\`\`
 
+The frontend build automatically outputs to \`backend/cmd/server/dist/\` - **no manual copying required!**
+
 #### Using Docker:
 \`\`\`bash
 docker build -t test-app .
@@ -198,12 +214,9 @@ docker run -p 8080:8080 test-app
 
 #### Manual build:
 \`\`\`bash
-# Build frontend
+# Build frontend (auto-outputs to backend/cmd/server/dist)
 cd frontend
 yarn build
-
-# Copy to backend
-cp -r dist ../backend/cmd/server/
 
 # Build backend
 cd ../backend
@@ -212,6 +225,62 @@ go build -o bin/server ./cmd/server
 # Run
 ./bin/server
 \`\`\`
+
+## Design System
+
+The app includes a comprehensive design system with reusable components:
+
+### Input Component
+\`\`\`tsx
+import { Input } from '@/components/design-system';
+
+<Input
+  label="Username"
+  type="text"
+  value={username}
+  onChange={(e) => setUsername(e.target.value)}
+  error={error}
+  fullWidth
+  placeholder="Enter username"
+/>
+\`\`\`
+
+### Select Component
+\`\`\`tsx
+import { Select } from '@/components/design-system';
+
+<Select
+  label="Choose Option"
+  options={[
+    { value: 'option1', label: 'Option 1' },
+    { value: 'option2', label: 'Option 2' },
+  ]}
+  value={selected}
+  onChange={(e) => setSelected(e.target.value)}
+  fullWidth
+/>
+\`\`\`
+
+### Button Component
+\`\`\`tsx
+import { Button } from '@/components/design-system';
+
+<Button
+  variant="primary"  // primary, secondary, danger, ghost
+  size="md"          // sm, md, lg
+  loading={isLoading}
+  fullWidth
+  onClick={handleClick}
+>
+  Click Me
+</Button>
+\`\`\`
+
+All design system components:
+- Support theme switching (Dark, Light, Gold)
+- Include accessibility features
+- Provide consistent styling across the app
+- Support loading states and error states
 
 ## API Endpoints
 
@@ -287,7 +356,7 @@ E2E tests automatically:
 The project includes comprehensive GitHub Actions workflows:
 
 ### Backend CI (\`.github/workflows/backend.yml\`)
-- Linting with golangci-lint
+- Linting with golangci-lint (fixed configuration for latest version)
 - Go tests with race detection
 - Security scanning with gosec
 - Coverage reporting
@@ -312,6 +381,13 @@ The project includes comprehensive GitHub Actions workflows:
 - Dependency security checks
 
 ## Development
+
+### Automatic Build Output
+
+The webpack configuration automatically outputs production builds to \`backend/cmd/server/dist/\`:
+- No manual copying needed
+- Works for both \`yarn build\` and \`npm run build\`
+- Development mode still outputs to \`frontend/dist\` for dev server
 
 ### Hot Module Reloading
 
@@ -401,12 +477,15 @@ Features:
 - Input validation with Zod (frontend) and Go validation (backend)
 - Security scanning in CI/CD (gosec, Trivy, CodeQL)
 - Dependency vulnerability checks
+- Design system components with secure defaults
 
 ## Architecture Highlights
 
 - **Embedded Frontend**: Frontend assets embedded in Go binary using \`embed.FS\`
+- **Automatic Build Output**: Webpack outputs directly to backend directory
 - **Hot Reload**: Development mode supports HMR for both frontend and backend
 - **Proxy Configuration**: Webpack proxy forwards API calls during development
+- **Design System**: Reusable components with consistent theming
 - **Modular Backend**: Clean separation with distinct packages
 - **Type Safety**: TypeScript in frontend, Go's strong typing in backend
 - **CI/CD Ready**: Comprehensive GitHub Actions workflows with artifact uploads
@@ -421,6 +500,7 @@ The codebase is structured to easily add:
 - Rate limiting
 - WebSocket support
 - Kubernetes deployment manifests
+- Additional design system components (Card, Modal, Toast, etc.)
 
 ## License
 

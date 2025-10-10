@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { Input, Button } from '@/components/design-system';
 
 const ConvertPage: React.FC = () => {
   const { type } = useParams<{ type: string }>();
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const getTitle = () => {
     switch (type) {
@@ -19,6 +21,7 @@ const ConvertPage: React.FC = () => {
   };
 
   const handleConvert = async () => {
+    setLoading(true);
     try {
       const response = await fetch(`/api/convert/${type}`, {
         method: 'POST',
@@ -36,44 +39,58 @@ const ConvertPage: React.FC = () => {
       }
     } catch (error) {
       setOutput('Error occurred');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white gold:text-gold-900">
+      <h1 className="text-3xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
         {getTitle()}
       </h1>
       
-      <div className="bg-white dark:bg-gray-800 gold:bg-white rounded-lg shadow-md p-6">
+      <div className="rounded-lg shadow-md p-6" style={{ backgroundColor: 'var(--bg-secondary)' }}>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
             Input Text
           </label>
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white gold:border-gold-300"
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{ 
+              backgroundColor: 'var(--bg-primary)', 
+              color: 'var(--text-primary)',
+              borderColor: 'var(--text-secondary)'
+            }}
             rows={5}
             placeholder="Enter text here..."
           />
         </div>
 
-        <button
+        <Button
           onClick={handleConvert}
-          className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition mb-4"
+          fullWidth
+          loading={loading}
+          className="mb-4"
         >
           Convert
-        </button>
+        </Button>
 
         <div>
-          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
             Output
           </label>
           <textarea
             value={output}
             readOnly
-            className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-900 dark:border-gray-600 dark:text-white gold:bg-gold-50 gold:border-gold-300"
+            className="w-full p-3 border rounded-lg"
+            style={{ 
+              backgroundColor: 'var(--bg-primary)', 
+              color: 'var(--text-primary)',
+              borderColor: 'var(--text-secondary)'
+            }}
             rows={5}
             placeholder="Output will appear here..."
           />

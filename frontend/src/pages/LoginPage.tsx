@@ -1,30 +1,35 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { Input, Button } from '@/components/design-system';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     try {
       await login(username, password);
       navigate('/');
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 gold:bg-gold-50">
-      <div className="max-w-md w-full bg-white dark:bg-gray-800 gold:bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-white gold:text-gold-900">
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
+      <div className="max-w-md w-full rounded-lg shadow-md p-8" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+        <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: 'var(--text-primary)' }}>
           Login
         </h2>
 
@@ -36,40 +41,37 @@ const LoginPage: React.FC = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-              Username
-            </label>
-            <input
+            <Input
+              label="Username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white gold:border-gold-300"
+              fullWidth
               required
             />
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-              Password
-            </label>
-            <input
+            <Input
+              label="Password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white gold:border-gold-300"
+              fullWidth
               required
             />
           </div>
 
-          <button
+          <Button
             type="submit"
-            className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            fullWidth
+            loading={loading}
           >
             Login
-          </button>
+          </Button>
         </form>
 
-        <p className="mt-4 text-center text-gray-600 dark:text-gray-400">
+        <p className="mt-4 text-center" style={{ color: 'var(--text-secondary)' }}>
           Don't have an account?{' '}
           <Link to="/register" className="text-blue-500 hover:text-blue-600">
             Register
