@@ -21,13 +21,26 @@ code {
     monospace;
 }
 
-/* Gold theme specific styles */
-.gold {
-  --tw-bg-opacity: 1;
-  background-color: rgb(254 243 199 / var(--tw-bg-opacity));
+/* Dark theme - dark blue background with white text */
+.dark {
+  --bg-primary: #1e3a8a;
+  --bg-secondary: #1e40af;
+  --text-primary: #ffffff;
+  --text-secondary: #e0e7ff;
 }
 
-.gold .bg-white {
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+/* Light theme - white background with dark blue text */
+.light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f3f4f6;
+  --text-primary: #1e3a8a;
+  --text-secondary: #3730a3;
+}
+
+/* Gold theme - golden background with appropriate text */
+.gold {
+  --bg-primary: #fef3c7;
+  --bg-secondary: #fde68a;
+  --text-primary: #78350f;
+  --text-secondary: #92400e;
 }

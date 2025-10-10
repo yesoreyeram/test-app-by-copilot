@@ -13,7 +13,10 @@ A full-stack enterprise-level web application with React frontend and Go backend
 - Responsive design with Tailwind CSS
 - Sticky top navigation with logo, breadcrumbs, and search
 - Collapsible left sidebar with feature links
-- Multiple theme support (Dark, Light, Gold) - **Dark theme by default**
+- **Multiple theme support** (Dark, Light, Gold) - **Dark theme by default**
+  - **Dark theme**: Dark blue background (#1e3a8a) with white text
+  - **Light theme**: White background with dark blue text  
+  - **Gold theme**: Golden background with brown text
 - Hero section on home page
 
 ### Authentication
@@ -27,7 +30,7 @@ A full-stack enterprise-level web application with React frontend and Go backend
 ### Frontend
 - **React 19** with TypeScript
 - **React Router 7** for routing
-- **Tailwind CSS 4** for styling
+- **Tailwind CSS 4** for styling with custom theme system
 - **Zod** for validation
 - **Webpack 5** for bundling with Hot Module Replacement
 - **Jest** and **React Testing Library** for unit testing
@@ -49,119 +52,152 @@ A full-stack enterprise-level web application with React frontend and Go backend
 
 ## Project Structure
 
-```
+\`\`\`
 .
 ├── frontend/
 │   ├── src/
 │   │   ├── components/     # Reusable UI components
 │   │   ├── pages/          # Page components
 │   │   ├── contexts/       # React contexts (Theme, Auth)
-│   │   ├── utils/          # Utility functions
-│   │   └── hooks/          # Custom React hooks
+│   │   └── styles.css      # Global styles with theme CSS variables
 │   ├── public/             # Static assets
 │   ├── e2e/                # Playwright E2E tests
-│   └── webpack.config.js   # Webpack configuration
+│   └── webpack.config.js   # Webpack config with proxy
 │
 ├── backend/
 │   ├── cmd/server/         # Main application entry point
 │   ├── pkg/                # Public packages
-│   │   ├── textconv/       # Text conversion
-│   │   ├── mathops/        # Math operations
-│   │   ├── tempconv/       # Temperature conversion
-│   │   └── auth/           # Authentication
 │   └── internal/store/     # Internal data storage
 │
 ├── .github/workflows/      # CI/CD pipelines
+│   ├── backend.yml         # Backend CI
+│   ├── frontend.yml        # Frontend CI
+│   ├── e2e.yml             # E2E tests
+│   └── security.yml        # Security scanning
+│
 ├── Dockerfile              # Production build
 ├── Dockerfile.dev          # Development build
 ├── docker-compose.yml      # Production compose
-└── docker-compose.dev.yml  # Development compose
-```
+├── docker-compose.dev.yml  # Development compose  
+└── package.json            # Root package with dev scripts
+\`\`\`
 
 ## Getting Started
 
 ### Prerequisites
 - Go 1.24 or higher
-- Node.js 20 or higher
+- Node.js 20 or higher  
 - Yarn package manager
 - Docker and Docker Compose (optional)
 
 ### Installation
 
 1. Clone the repository:
-```bash
+\`\`\`bash
 git clone https://github.com/yesoreyeram/test-app-by-copilot.git
 cd test-app-by-copilot
-```
+\`\`\`
 
-2. Install frontend dependencies:
-```bash
+2. Install root dependencies:
+\`\`\`bash
+npm install  # or yarn install
+\`\`\`
+
+3. Install frontend dependencies:
+\`\`\`bash
 cd frontend
 yarn install
-```
+\`\`\`
 
-3. Install backend dependencies:
-```bash
+4. Install backend dependencies:
+\`\`\`bash
 cd ../backend
 go mod download
-```
+\`\`\`
 
 ### Running the Application
 
-#### Option 1: Docker Compose (Recommended for Development)
+#### Option 1: Using npm scripts (Recommended for Development)
+
+**Run both frontend and backend in parallel with hot reload:**
+\`\`\`bash
+npm run dev
+\`\`\`
+This starts:
+- Frontend dev server on http://localhost:3000 (with HMR)
+- Backend with Air hot reload on http://localhost:8080
+
+Access the app at **http://localhost:3000** during development.
+
+**Build for production:**
+\`\`\`bash
+npm run build
+npm start
+\`\`\`
+Access the unified app at **http://localhost:8080**.
+
+#### Option 2: Docker Compose
 
 **Development mode with hot reload:**
-```bash
+\`\`\`bash
 docker-compose -f docker-compose.dev.yml up
-```
-- Backend with Air hot reload: \`http://localhost:8080\`
-- Frontend dev server: \`http://localhost:3000\`
+\`\`\`
+- Backend with Air hot reload: http://localhost:8080
+- Frontend dev server: http://localhost:3000
 
 **Production mode:**
-```bash
+\`\`\`bash
 docker-compose up --build
-```
-- Unified app (backend serves frontend): \`http://localhost:8080\`
+\`\`\`
+- Unified app (backend serves frontend): http://localhost:8080
 
-#### Option 2: Manual Setup
+#### Option 3: Manual Setup
+
+**Frontend dev server:**
+\`\`\`bash
+cd frontend
+yarn start    # Runs on http://localhost:3000
+\`\`\`
+The webpack dev server is configured with a proxy that forwards `/api` and `/health` requests to `http://localhost:8080`.
+
+**Backend with Air (hot reload):**
+\`\`\`bash
+cd backend
+go install github.com/air-verse/air@latest
+air           # Runs on http://localhost:8080
+\`\`\`
 
 **Backend (with embedded frontend):**
-```bash
+\`\`\`bash
 # Build frontend first
 cd frontend
 yarn build
 
-# Copy dist to backend (automated in Dockerfile)
+# Copy dist to backend
 cp -r dist ../backend/cmd/server/
 
 # Run backend
 cd ../backend
 go run cmd/server/main.go
-```
-The application will be available at \`http://localhost:8080\`
-
-**Development mode with hot reload:**
-```bash
-# Terminal 1: Frontend dev server
-cd frontend
-yarn start    # Runs on http://localhost:3000
-
-# Terminal 2: Backend with Air
-cd backend
-go install github.com/air-verse/air@latest
-air           # Runs on http://localhost:8080
-```
+# Access at http://localhost:8080
+\`\`\`
 
 ### Building for Production
 
+#### Using npm scripts:
+\`\`\`bash
+npm run build    # Builds frontend and backend
+npm start        # Starts the unified server
+\`\`\`
+
 #### Using Docker:
-```bash
+\`\`\`bash
 docker build -t test-app .
 docker run -p 8080:8080 test-app
-```
+\`\`\`
 
 #### Manual build:
-```bash
+\`\`\`bash
 # Build frontend
 cd frontend
 yarn build
@@ -175,9 +211,7 @@ go build -o bin/server ./cmd/server
 
 # Run
 ./bin/server
-```
-
-The production build will be available at \`http://localhost:8080\`
+\`\`\`
 
 ## API Endpoints
 
@@ -192,7 +226,7 @@ The production build will be available at \`http://localhost:8080\`
 - \`POST /api/convert/inverse\` - Invert case
 - \`POST /api/convert/reverse\` - Reverse text
 
-Request body: \`{ "input": "Hello World" }\`
+Request body: \`{ "input": "Hello World" }\`  
 Response: \`{ "output": "hello world", "meta": { "status": "success" } }\`
 
 ### Math Operations
@@ -207,7 +241,7 @@ Response: \`{ "output": 5 }\`
 - \`GET /api/temp/c/f/{value}\` - Celsius to Fahrenheit
 - \`GET /api/temp/f/c/{value}\` - Fahrenheit to Celsius
 
-Requires \`Authorization: Bearer {token}\` header
+Requires \`Authorization: ******  
 Response: \`{ "output": 32, "meta": { "status": "success" } }\`
 
 ### Authentication
@@ -221,76 +255,162 @@ Response: \`{ "output": 32, "meta": { "status": "success" } }\`
 ## Testing
 
 ### Backend Tests
-```bash
+\`\`\`bash
 cd backend
 go test ./...
-```
+\`\`\`
 
 ### Frontend Unit Tests
-```bash
+\`\`\`bash
 cd frontend
 yarn test
-```
+\`\`\`
 
 ### E2E Tests
-```bash
+\`\`\`bash
 cd frontend
 # Install Playwright browsers (first time only)
 npx playwright install
 
 # Run E2E tests
 yarn test:e2e
-```
+\`\`\`
+
+E2E tests automatically:
+- Start the backend server with embedded frontend
+- Run tests against http://localhost:8080
+- Capture screenshots on test failures
+- Generate HTML reports
 
 ## CI/CD
 
-The project includes GitHub Actions workflows for:
-- **Backend CI**: Linting (golangci-lint), testing, security scanning (gosec)
-- **Frontend CI**: Linting (ESLint), type checking, testing, Playwright E2E tests
-- **Security**: Trivy vulnerability scanning, CodeQL analysis
+The project includes comprehensive GitHub Actions workflows:
 
-## Development Tools
+### Backend CI (\`.github/workflows/backend.yml\`)
+- Linting with golangci-lint
+- Go tests with race detection
+- Security scanning with gosec
+- Coverage reporting
+- Build verification
+
+### Frontend CI (\`.github/workflows/frontend.yml\`)
+- ESLint and Prettier checks
+- TypeScript type checking
+- Jest unit tests with coverage
+- Build verification
+- Artifact uploads
+
+### E2E Tests (\`.github/workflows/e2e.yml\`)
+- Builds both frontend and backend
+- Runs Playwright E2E tests
+- **Uploads screenshots as artifacts**
+- **Uploads test reports as artifacts**
+
+### Security Scanning (\`.github/workflows/security.yml\`)
+- Trivy vulnerability scanning
+- CodeQL static analysis
+- Dependency security checks
+
+## Development
 
 ### Hot Module Reloading
-- **Frontend**: Webpack Dev Server with HMR
-- **Backend**: Air for automatic Go code reloading
 
-### Code Quality
-- **Backend**: golangci-lint with comprehensive rule set
-- **Frontend**: ESLint, Prettier, TypeScript strict mode
-- **Security**: gosec, Trivy, CodeQL
+**Frontend:**
+- Webpack Dev Server with HMR
+- Changes to React components update instantly
+- Preserves application state during updates
+
+**Backend:**
+- Air watches for Go file changes
+- Automatically rebuilds and restarts server
+- Configuration in \`.air.toml\`
+
+### Webpack Proxy Configuration
+
+The frontend dev server (\`webpack.config.js\`) proxies API requests:
+\`\`\`javascript
+proxy: [
+  {
+    context: ['/api', '/health'],
+    target: 'http://localhost:8080',
+    changeOrigin: true,
+  },
+]
+\`\`\`
+
+This allows the frontend (port 3000) to make API calls to the backend (port 8080) without CORS issues during development.
+
+### Theme System
+
+The app uses CSS custom properties for theming:
+
+\`\`\`css
+/* Dark theme (default) */
+.dark {
+  --bg-primary: #1e3a8a;      /* Dark blue */
+  --bg-secondary: #1e40af;
+  --text-primary: #ffffff;     /* White */
+  --text-secondary: #e0e7ff;
+}
+
+/* Light theme */
+.light {
+  --bg-primary: #ffffff;       /* White */
+  --bg-secondary: #f3f4f6;
+  --text-primary: #1e3a8a;     /* Dark blue */
+  --text-secondary: #3730a3;
+}
+
+/* Gold theme */
+.gold {
+  --bg-primary: #fef3c7;       /* Golden */
+  --bg-secondary: #fde68a;
+  --text-primary: #78350f;     /* Brown */
+  --text-secondary: #92400e;
+}
+\`\`\`
+
+Components use inline styles with \`var(--bg-primary)\` etc. for theme-aware styling.
 
 ## Docker
 
 ### Development
-```bash
+\`\`\`bash
 docker-compose -f docker-compose.dev.yml up
-```
-Includes hot reload for both frontend and backend.
+\`\`\`
+Includes:
+- Air hot reload for backend
+- Webpack Dev Server for frontend
+- Volume mounts for live code updates
 
 ### Production
-```bash
+\`\`\`bash
 docker-compose up --build
-```
-Multi-stage build for optimized image with embedded frontend.
+\`\`\`
+Features:
+- Multi-stage build for optimized image
+- Embedded frontend in Go binary
+- Health checks
+- Single container deployment
 
 ## Security Features
 
-- Session-based authentication with expiration
-- Protected routes requiring authentication
-- No CORS issues (frontend embedded in backend)
-- Input validation with Zod
-- Security scanning in CI/CD pipeline
+- Session-based authentication with expiration (24 hours)
+- Protected routes requiring authentication tokens
+- **No CORS issues** - frontend embedded in backend for production
+- Input validation with Zod (frontend) and Go validation (backend)
+- Security scanning in CI/CD (gosec, Trivy, CodeQL)
 - Dependency vulnerability checks
 
 ## Architecture Highlights
 
-- **Embedded Frontend**: Frontend assets are embedded in Go binary, eliminating CORS and deployment complexity
-- **Modular Backend**: Clean separation of concerns with distinct packages
+- **Embedded Frontend**: Frontend assets embedded in Go binary using \`embed.FS\`
+- **Hot Reload**: Development mode supports HMR for both frontend and backend
+- **Proxy Configuration**: Webpack proxy forwards API calls during development
+- **Modular Backend**: Clean separation with distinct packages
 - **Type Safety**: TypeScript in frontend, Go's strong typing in backend
-- **Hot Reload**: Development experience with instant feedback
-- **Container Ready**: Docker and Docker Compose for easy deployment
-- **CI/CD Ready**: Comprehensive GitHub Actions workflows
+- **CI/CD Ready**: Comprehensive GitHub Actions workflows with artifact uploads
+- **Container Ready**: Docker and Docker Compose for all environments
 
 ## Future Enhancements
 

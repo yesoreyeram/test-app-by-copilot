@@ -44,12 +44,14 @@ const Sidebar: React.FC = () => {
     <aside
       className={`${
         isCollapsed ? 'w-16' : 'w-64'
-      } transition-all duration-300 bg-gray-50 dark:bg-gray-900 gold:bg-gold-50 border-r dark:border-gray-700 gold:border-gold-200`}
+      } transition-all duration-300 border-r`}
+      style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--text-secondary)' }}
     >
       <div className="p-4">
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="mb-4 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-800 w-full"
+          className="mb-4 p-2 rounded hover:opacity-80 w-full"
+          style={{ color: 'var(--text-primary)' }}
         >
           {isCollapsed ? '→' : '←'}
         </button>
@@ -58,9 +60,10 @@ const Sidebar: React.FC = () => {
           {navItems.map((item) => (
             <div key={item.path}>
               <div
-                className={`font-semibold text-gray-700 dark:text-gray-300 gold:text-gold-900 p-2 ${
+                className={`font-semibold p-2 ${
                   isCollapsed ? 'text-center' : ''
                 }`}
+                style={{ color: 'var(--text-primary)' }}
               >
                 {isCollapsed ? item.title[0] : item.title}
               </div>
@@ -73,8 +76,9 @@ const Sidebar: React.FC = () => {
                       className={`block p-2 rounded text-sm ${
                         isActive(child.path)
                           ? 'bg-blue-500 text-white'
-                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800'
+                          : 'hover:opacity-80'
                       }`}
+                      style={!isActive(child.path) ? { color: 'var(--text-secondary)' } : {}}
                     >
                       {child.title}
                     </Link>

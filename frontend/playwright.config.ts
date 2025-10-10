@@ -8,8 +8,9 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:8080',
     trace: 'on-first-retry',
+    screenshot: 'on',
   },
   projects: [
     {
@@ -18,8 +19,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'yarn start',
-    url: 'http://localhost:3000',
+    command: 'cd ../backend && go run cmd/server/main.go',
+    url: 'http://localhost:8080',
     reuseExistingServer: !process.env.CI,
   },
 });
