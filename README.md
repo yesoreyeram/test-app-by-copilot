@@ -116,19 +116,26 @@ cd test-app-by-copilot
 
 2. Install root dependencies:
 \`\`\`bash
-npm install  # or yarn install
+npm install
 \`\`\`
 
 3. Install frontend dependencies:
 \`\`\`bash
 cd frontend
 yarn install
+cd ..
 \`\`\`
 
 4. Install backend dependencies:
 \`\`\`bash
-cd ../backend
+cd backend
 go mod download
+cd ..
+\`\`\`
+
+5. Install Air for backend hot reload (optional, for development):
+\`\`\`bash
+go install github.com/air-verse/air@latest
 \`\`\`
 
 ### Running the Application
@@ -139,11 +146,12 @@ go mod download
 \`\`\`bash
 npm run dev
 \`\`\`
-This starts:
-- Frontend dev server on http://localhost:3000 (with HMR)
-- Backend with Air hot reload on http://localhost:8080
 
-Access the app at **http://localhost:3000** during development.
+This command starts:
+- **Frontend dev server**: http://localhost:3000 (with HMR and proxy to backend)
+- **Backend API server**: http://localhost:8080 (with Air hot reload)
+
+**Important**: During development, access the app at **http://localhost:3000**. The frontend dev server proxies API calls to the backend on port 8080.
 
 **Build for production:**
 \`\`\`bash
@@ -151,7 +159,7 @@ npm run build
 npm start
 \`\`\`
 The frontend automatically builds to \`backend/cmd/server/dist/\` - no manual copying needed!
-Access the unified app at **http://localhost:8080**.
+Access the unified app at **http://localhost:8080** (backend serves the frontend).
 
 #### Option 2: Docker Compose
 
@@ -180,11 +188,12 @@ The webpack dev server is configured with a proxy that forwards \`/api\` and \`/
 **Backend with Air (hot reload):**
 \`\`\`bash
 cd backend
-go install github.com/air-verse/air@latest
 air           # Runs on http://localhost:8080
 \`\`\`
 
-**Backend (with embedded frontend):**
+**Access the app at http://localhost:3000** during development (frontend with backend proxy).
+
+**Backend (production mode with embedded frontend):**
 \`\`\`bash
 # Build frontend (automatically outputs to backend/cmd/server/dist)
 cd frontend
@@ -193,8 +202,8 @@ yarn build
 # Run backend
 cd ../backend
 go run cmd/server/main.go
-# Access at http://localhost:8080
 \`\`\`
+**Access at http://localhost:8080** (backend serves embedded frontend).
 
 ### Building for Production
 

@@ -29,7 +29,8 @@ func main() {
 	// Serve static files
 	distFS, err := fs.Sub(staticFiles, "dist")
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Warning: Could not load embedded static files: %v", err)
+		log.Println("Static files will not be served. Run 'yarn build' in frontend to create them.")
 	}
 	
 	// API endpoints
@@ -58,8 +59,10 @@ func main() {
 	http.HandleFunc("/api/auth/logout", authMiddleware.RequireAuth(logoutHandler))
 	http.HandleFunc("/api/auth/profile", authMiddleware.RequireAuth(profileHandler))
 
-	// Serve static files for all other routes
-	http.Handle("/", http.FileServer(http.FS(distFS)))
+	// Serve static files for all other routes (only if dist exists)
+	if err == nil {
+		http.Handle("/", http.FileServer(http.FS(distFS)))
+	}
 
 	port := "8080"
 	log.Printf("Server starting on port %s", port)

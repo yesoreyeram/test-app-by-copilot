@@ -9,4 +9,6 @@ vendor/
 .DS_Store
 tmp/
 dist/
-cmd/server/dist/
+# Keep the dist folder structure but ignore built files
+cmd/server/dist/*
+!cmd/server/dist/index.html
