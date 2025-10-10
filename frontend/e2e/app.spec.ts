@@ -8,9 +8,9 @@ test.describe('Home Page', () => {
 
   test('should have feature links', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByText('Text Conversion')).toBeVisible();
-    await expect(page.getByText('Math Operations')).toBeVisible();
-    await expect(page.getByText('Temperature Converter')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Text Conversion' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Math Operations' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Temperature Converter' })).toBeVisible();
   });
 });
 
