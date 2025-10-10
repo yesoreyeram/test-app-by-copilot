@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+yarn-error.log
+coverage/
+.env
+.env.local
+playwright-report/
+test-results/
