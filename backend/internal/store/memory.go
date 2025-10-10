@@ -9,29 +9,29 @@ import (
 )
 
 var (
-	ErrUserNotFound      = errors.New("user not found")
+	ErrUserNotFound       = errors.New("user not found")
 	ErrInvalidCredentials = errors.New("invalid credentials")
-	ErrUserExists        = errors.New("user already exists")
+	ErrUserExists         = errors.New("user already exists")
 )
 
 type User struct {
+	CreatedAt time.Time `json:"created_at"`
 	ID        string    `json:"id"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
 	Password  string    `json:"-"` // Never serialize password
-	CreatedAt time.Time `json:"created_at"`
 }
 
 type Session struct {
+	CreatedAt time.Time `json:"created_at"`
+	ExpiresAt time.Time `json:"expires_at"`
 	ID        string    `json:"id"`
 	UserID    string    `json:"user_id"`
 	Token     string    `json:"token"`
-	CreatedAt time.Time `json:"created_at"`
-	ExpiresAt time.Time `json:"expires_at"`
 }
 
 type MemoryStore struct {
-	users    map[string]*User // key: username
+	users    map[string]*User    // key: username
 	sessions map[string]*Session // key: token
 	mu       sync.RWMutex
 }

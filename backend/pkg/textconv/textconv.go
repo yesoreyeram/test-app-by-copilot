@@ -20,15 +20,15 @@ func ToCamelCase(input string) string {
 	if input == "" {
 		return ""
 	}
-	
+
 	words := strings.Fields(input)
 	if len(words) == 0 {
 		return ""
 	}
-	
+
 	result := strings.ToLower(words[0])
 	for i := 1; i < len(words); i++ {
-		if len(words[i]) > 0 {
+		if words[i] != "" {
 			result += strings.ToUpper(string(words[i][0])) + strings.ToLower(words[i][1:])
 		}
 	}
