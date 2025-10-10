@@ -41,9 +41,7 @@ jobs:
     - name: Build frontend
       working-directory: ./frontend
       run: yarn build
-      
-    - name: Copy frontend to backend
-      run: cp -r frontend/dist backend/cmd/server/
+      # Frontend automatically builds to backend/cmd/server/dist - no copy needed
       
     - name: Install backend dependencies
       working-directory: ./backend
